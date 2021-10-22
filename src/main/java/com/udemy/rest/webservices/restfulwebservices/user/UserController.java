@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -19,20 +20,10 @@ public class UserController {
         return userDaoService.findAll();
     }
 
-    @GetMapping("/users/{id}")
-    public User retrieveUser(@PathVariable int id){
-        User user = userDaoService.findOne(id);
-        if(user == null){
-            throw new UserNotFoundException("User with id " + id + " does not exist!");
-        }
-        return user;
-    }
-
     @PostMapping("/users")
-    public ResponseEntity<Object> createUser(@RequestBody User user){
+    public ResponseEntity<Object> createUser(@Valid @RequestBody User user){
 
         User savedUser = userDaoService.saveUser(user);
-
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(savedUser.getId())
@@ -40,4 +31,28 @@ public class UserController {
 
         return ResponseEntity.created(location).build();
     }
+
+    @GetMapping("/users/{id}")
+    public User retrieveUser(@PathVariable int id){
+
+        User user = userDaoService.findOne(id);
+        if(user == null){
+            throw new UserNotFoundException("User with id " + id + " does not exist!");
+        }
+
+        return user;
+    }
+
+    @DeleteMapping("/users/{id}")
+    public User deleteUser(@PathVariable int id){
+
+        User user = userDaoService.findOne(id);
+        if(user == null){
+            throw new UserNotFoundException("User with id " + id + " does not exist!");
+        }
+        userDaoService.deleteById(id);
+
+        return user;
+    }
+
 }
